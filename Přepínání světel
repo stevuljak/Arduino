@@ -1,0 +1,46 @@
+#define button 11
+#define HighLED 8
+#define LowLED 9
+int state = 0;
+int old = 0;
+int buttonPoll = 0;
+
+void setup() {
+ pinMode(button,INPUT);
+ //RGB LED set as output
+ pinMode(HighLED,OUTPUT);
+ pinMode(LowLED,OUTPUT);
+ digitalWrite(HighLED,LOW);
+ digitalWrite(LowLED,LOW);
+ }
+
+void loop() {
+ buttonPoll = digitalRead(button);
+ if(buttonPoll == 1) {
+ delay(50);
+ buttonPoll = digitalRead(button);
+ if(buttonPoll == 0) {
+ state = old + 1;
+ }
+ }
+ else {
+ delay(100);
+}
+switch (state) {
+ case 1: //High Light
+ digitalWrite(HighLED,HIGH);
+ digitalWrite(LowLED,LOW);
+ old = state;
+ break;
+ case 2: //Low Light
+ digitalWrite(HighLED,LOW);
+ digitalWrite(LowLED,HIGH);
+ old = state;
+ break;
+ default: //No Light
+ digitalWrite(HighLED,LOW);
+ digitalWrite(LowLED,LOW);
+ old = 0;
+ break;
+ }
+}
