@@ -1,0 +1,95 @@
+#include <mcp2515.h>
+
+MCP2515 mcp2515(10);
+struct can_frame canMsg;
+
+int   rychlost = 0;
+float vyskaveze = 512;
+int   vyskavezeRAW = 512;
+int   vyskavezefinal = 85;
+int   vyskaold = 0;
+int   kanon = 0;
+
+#include <Servo.h>
+
+Servo myservo;
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(7,OUTPUT);
+
+  myservo.attach(4);
+
+  mcp2515.reset();
+  mcp2515.setBitrate(CAN_250KBPS);
+  mcp2515.setNormalMode();
+
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  mcp2515.readMessage(&canMsg);
+
+  rychlost = canMsg.data[0];
+  rychlost = rychlost * 4;
+  vyskavezeRAW = canMsg.data[1];
+  vyskavezeRAW = vyskavezeRAW * 4;
+  kanon = canMsg.data[2];
+
+  if (rychlost < 410) {
+    rychlost = map(rychlost, 1024, 0, 750, 20);
+
+    digitalWrite(6, LOW);   //dir
+    digitalWrite(5, HIGH);  //rot
+    delayMicroseconds(rychlost);
+    digitalWrite(5, LOW);  //rot
+    delayMicroseconds(rychlost);
+  } else {
+
+    if (rychlost > 620) {
+      rychlost = map(rychlost, 0, 1024, 750, 20);
+
+      digitalWrite(6, HIGH);  //dir
+      digitalWrite(5, HIGH);  //rot
+      delayMicroseconds(rychlost);
+      digitalWrite(5, LOW);  //rot
+      delayMicroseconds(rychlost);
+    } else {
+      digitalWrite(6, LOW);  //dir
+      digitalWrite(5, LOW);  //rot
+    }
+  }
+
+  if (vyskavezeRAW < 410) {
+    if (vyskaveze > 0) {
+      vyskaveze = vyskaveze - 0.05;
+      vyskavezefinal = map(vyskaveze, 0, 1024, 60, 120);
+    }
+  }
+  if (vyskavezeRAW > 620) {
+    if (vyskaveze < 1024) {
+      vyskaveze = vyskaveze + 0.05;
+      vyskavezefinal = map(vyskaveze, 0, 1024, 60, 120);
+    }
+  }
+  if (vyskavezefinal != vyskaold) {
+    vyskaold = vyskavezefinal;
+    myservo.write(vyskavezefinal);
+  }
+
+  if (kanon == 1){
+
+    digitalWrite(7,HIGH);
+    delay(100);
+    digitalWrite(7,LOW);
+    kanon = 0;
+    delay(2000);
+
+
+  }
+}
