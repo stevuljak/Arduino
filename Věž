@@ -90,6 +90,12 @@ void loop() {
     kanon = 0;
     delay(2000);
 
+  Serial.println("vyskavezeRAW: ");
+  Serial.println(vyskavezeRAW);
+  Serial.println("vyskavezefinal: ");
+  Serial.println(vyskavezefinal);
+  Serial.println(" ");
+  Serial.println(" ");
 
   }
 }
