@@ -36,4 +36,17 @@ void loop() {
 
   if (tlac == 1){delay(2000);}
 
+    Serial.println("volant: ");
+  Serial.println(volant);
+  Serial.println("rychlost: ");
+  Serial.println(rychlost);
+  Serial.println("volantraw: ");
+  Serial.println(volantraw);
+  Serial.println("rychlostraw: ");
+  Serial.println(rychlostraw);
+  Serial.println("startread: ");
+  Serial.println(startread);
+  Serial.println(" ");
+  Serial.println(" ");
+  
 }
