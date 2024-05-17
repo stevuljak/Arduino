@@ -1,46 +1,52 @@
-#define button 11
-#define HighLED 8
-#define LowLED 9
-int state = 0;
-int old = 0;
-int buttonPoll = 0;
+#include <mcp2515.h>
+struct can_frame canMsg;  // založení struktury dat pro CAN BUS
+MCP2515 mcp2515(10);
+
+int pot1 = 512;
+int pot2 = 512;
+int tlac = 0;
 
 void setup() {
- pinMode(button,INPUT);
- //RGB LED set as output
- pinMode(HighLED,OUTPUT);
- pinMode(LowLED,OUTPUT);
- digitalWrite(HighLED,LOW);
- digitalWrite(LowLED,LOW);
- }
+
+  mcp2515.reset();
+  mcp2515.setBitrate(CAN_250KBPS);
+  mcp2515.setNormalMode();
+
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(4, INPUT);
+
+  Serial.begin(9600);
+}
 
 void loop() {
- buttonPoll = digitalRead(button);
- if(buttonPoll == 1) {
- delay(50);
- buttonPoll = digitalRead(button);
- if(buttonPoll == 0) {
- state = old + 1;
- }
- }
- else {
- delay(100);
-}
-switch (state) {
- case 1: //High Light
- digitalWrite(HighLED,HIGH);
- digitalWrite(LowLED,LOW);
- old = state;
- break;
- case 2: //Low Light
- digitalWrite(HighLED,LOW);
- digitalWrite(LowLED,HIGH);
- old = state;
- break;
- default: //No Light
- digitalWrite(HighLED,LOW);
- digitalWrite(LowLED,LOW);
- old = 0;
- break;
- }
+
+  pot1 = analogRead(A1);
+  pot2 = analogRead(A2);
+  tlac = digitalRead(4);
+
+  canMsg.can_id = 0x01;
+  canMsg.can_dlc = 3;
+  canMsg.data[0] = pot2 / 4;
+  canMsg.data[1] = pot1 / 4;
+  canMsg.data[2] = tlac;
+  Serial.println(tlac);
+
+  mcp2515.sendMessage(&canMsg);
+
+  if (tlac == 1){delay(2000);}
+
+  Serial.println("volant: ");
+  Serial.println(volant);
+  Serial.println("rychlost: ");
+  Serial.println(rychlost);
+  Serial.println("volantraw: ");
+  Serial.println(volantraw);
+  Serial.println("rychlostraw: ");
+  Serial.println(rychlostraw);
+  Serial.println("startread: ");
+  Serial.println(startread);
+  Serial.println(" ");
+  Serial.println(" ");
+
 }
